@@ -230,12 +230,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUFURaKnb-o6YuLFUkPakYIb7qvFvJtCOc85psO384Fi-94cJSFjrb5uWO0zn5qjOasQ/exec";
+        const WEB_APP_URL = "INSERAȚI_AICI_LINK-UL_APLICAȚIEI_WEB";
 
         const allQuizzes = {
             gdpr: {
                 title: "Chestionar de Evaluare GDPR",
-                scoringRules: ["Fiecare întrebare are 4 puncte.", "Punctajul maxim este 100.", "Răspunsurile incorecte nu se scad."],
+                scoringRules: ["Fiecare întrebare are un punctaj specificat.", "Punctajul maxim este 100.", "Răspunsurile incorecte nu se scad."],
                 questions: [
                     { id: 1, text: "Ce reprezinta persoana fizica identificabila in contextul GDPR:", options: ["persoana care poate fi identificata, direct sau indirect, in special prin referire la un element de identificare", "persoana despre care putem afla informatii din discutii cu prietenii"], correctAnswers: [0], points: 4 },
                     { id: 2, text: "Prelucrarea este considerata legala daca exista oricare din urmatoarele:", options: ["Consimtamant", "Contract", "Obligatii legale ale operatorului", "Dorinta expresa a persoanei de a face parte dintr-un studiu statistic", "Interes vital al persoanei vizate"], correctAnswers: [0, 1, 2, 4], points: 16 },
@@ -284,7 +284,7 @@
             }
 
             initializeEventListeners() {
-                document.getElementById('participantForm').addEventListener('submit', e => {
+                document.getElementById('participantForm').addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleParticipantForm();
                 });
@@ -303,7 +303,7 @@
             handleParticipantForm() {
                 const formData = new FormData(document.getElementById('participantForm'));
                 const participantData = Object.fromEntries(formData);
-                if (!Object.values(participantData).every(val => val)) {
+                if (!Object.values(participantData).every(val => val && val.trim() !== '')) {
                     this.showNotification('Vă rugăm să completați toate câmpurile.', 'error');
                     return;
                 }
@@ -428,9 +428,29 @@
                 const score = this.calculateScore();
                 const grade = this.getGrade(score);
                 const resultData = { ...this.participantData, quizTitle: this.allQuizData[this.activeQuizId].title, score, grade: grade.text };
-                
                 this.sendDataToSheet(resultData);
                 this.showResults(score);
+            }
+            
+            async sendDataToSheet(data) {
+                if (!WEB_APP_URL || WEB_APP_URL.includes("INSERAȚI_AICI")) {
+                    console.warn("Link-ul aplicației web nu este configurat. Datele nu vor fi trimise.");
+                    return;
+                }
+                try {
+                    this.showNotification('Se salvează rezultatul în centralizator...', 'info', 2000);
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    this.showNotification('Rezultatul a fost salvat cu succes!', 'success');
+                } catch (error) {
+                    console.error('Eroare la trimiterea datelor:', error);
+                    this.showNotification('Eroare la salvarea rezultatului online. - Probleme de conectivitate sau CORS', 'error');
+                }
             }
             
             calculateScore() {
@@ -452,19 +472,20 @@
                 };
                 
                 const resultsContentEl = document.getElementById('resultsContent');
-                let html = '<div class="result-summary">' +
-                           '<div class="score-display">' + score + '/100</div>' +
-                           '<div class="grade-display ' + grade.class + '">' + grade.text + '</div>' +
-                           '</div>' +
-                           '<div class="participant-info">' +
-                           '<h3>Informații Participant</h3>' +
-                           '<div class="info-grid">' +
-                           '<div class="info-item"><span>Nume:</span><span>' + this.participantData.lastName + ' ' + this.participantData.firstName + '</span></div>' +
-                           '<div class="info-item"><span>Test Susținut:</span><span>' + this.allQuizData[this.activeQuizId].title + '</span></div>' +
-                           '<div class="info-item"><span>Punctaj:</span><span>' + score + '/100</span></div>' +
-                           '<div class="info-item"><span>Calificativ:</span><span>' + grade.text + '</span></div>' +
-                           '</div></div>';
-                resultsContentEl.innerHTML = html;
+                resultsContentEl.innerHTML = 
+                    '<div class="result-summary">' +
+                        '<div class="score-display">' + score + '/100</div>' +
+                        '<div class="grade-display ' + grade.class + '">' + grade.text + '</div>' +
+                    '</div>' +
+                    '<div class="participant-info">' +
+                        '<h3>Informații Participant</h3>' +
+                        '<div class="info-grid">' +
+                            '<div class="info-item"><span>Nume:</span><span>' + this.participantData.lastName + ' ' + this.participantData.firstName + '</span></div>' +
+                            '<div class="info-item"><span>Test Susținut:</span><span>' + this.allQuizData[this.activeQuizId].title + '</span></div>' +
+                            '<div class="info-item"><span>Punctaj:</span><span>' + score + '/100</span></div>' +
+                            '<div class="info-item"><span>Calificativ:</span><span>' + grade.text + '</span></div>' +
+                        '</div>' +
+                    '</div>';
 
                 document.getElementById('results-title').textContent = 'Rezultate - ' + this.allQuizData[this.activeQuizId].title;
                 
@@ -494,12 +515,6 @@
                 const participantName = `${this.participantData.lastName} ${this.participantData.firstName}`;
                 document.title = `Portal de testare intern - ${quizTitle} - ${participantName}`;
                 window.print();
-            }
-
-            checkIfAnswerIsCorrect(question, userAnswer) {
-                const correct = question.correctAnswers.sort();
-                const user = (userAnswer || []).sort();
-                return user.length === correct.length && user.every((val, i) => val === correct[i]);
             }
             
             showNotification(message, type = 'info', duration = 3000) {
