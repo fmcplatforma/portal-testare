@@ -433,60 +433,6 @@
                 this.showResults(score);
             }
             
-            async sendDataToSheet(data) {
-                console.log('🔍 Attempting to send data to Google Sheets:', data);
-                console.log('🔗 WEB_APP_URL:', WEB_APP_URL);
-                
-                if (!WEB_APP_URL) {
-                    console.warn("❌ Link-ul aplicației web nu este configurat. Datele nu vor fi trimise.");
-                    this.showNotification('Link-ul Google Apps Script nu este configurat.', 'error');
-                    return;
-                }
-                
-                try {
-                    this.showNotification('Se salvează rezultatul în centralizator...', 'info', 2000);
-                    console.log('📤 Sending POST request to:', WEB_APP_URL);
-                    
-                    const response = await fetch(WEB_APP_URL, {
-                        method: 'POST', 
-                        mode: 'cors', 
-                        cache: 'no-cache',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    console.log('📥 Response received:');
-                    console.log('   Status:', response.status);
-                    console.log('   Status Text:', response.statusText);
-                    console.log('   Headers:', Object.fromEntries(response.headers.entries()));
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    const responseText = await response.text();
-                    console.log('📄 Response body:', responseText);
-                    
-                    this.showNotification('✅ Rezultatul a fost salvat cu succes!', 'success');
-                    console.log('✅ Data successfully sent to Google Sheets');
-                    
-                } catch (error) {
-                    console.error('❌ Detailed error information:');
-                    console.error('   Error type:', error.constructor.name);
-                    console.error('   Error message:', error.message);
-                    console.error('   Error stack:', error.stack);
-                    
-                    let errorMessage = 'Eroare la salvarea rezultatului online';
-                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                        errorMessage += ' - Probleme de conectivitate sau CORS';
-                    } else if (error.message.includes('HTTP')) {
-                        errorMessage += ' - ' + error.message;
-                    }
-                    
-                    this.showNotification(errorMessage, 'error');
-                }
-            }
-            
             calculateScore() {
                 const questions = this.allQuizData[this.activeQuizId].questions;
                 return questions.reduce((total, q) => {
