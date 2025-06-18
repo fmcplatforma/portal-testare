@@ -231,7 +231,7 @@
 
     <script>
         /* URL-ul generat la Deploy → Web app */
-	const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwX4FSG8zxiAPbCAmZ5401FQ8BKVhw2LhMDKcFRHlAin9Py5zBxVaD-meykrxeAZVQs8A/exec';
+	const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwJtq9ETpvLLJX-1Ti90PGgacPnbKhrudTm4-AaGSPmmNiibs8sm-2B-uw3TRXC4mCJcA/exec';
 
 
         const allQuizzes = {
@@ -436,29 +436,21 @@
             }
             
             async sendDataToSheet(payload) {
-  if (!WEB_APP_URL) {
-    alert('WEB_APP_URL nu este setat.');
-    return;
-  }
-
-/* 1️⃣  Construim corpul formularului */
-  const formBody = new URLSearchParams({
-    data: JSON.stringify(payload)      // tot obiectul tău devine un singur câmp „data”
-  }).toString();
-
   try {
-    await fetch(WEB_APP_URL, {
+    const response = await fetch(WEB_APP_URL, {
       method : 'POST',
-      mode   : 'no-cors',            // ← fără pre‑flight
-      headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-      body   : formBody
-      });
+      headers: { 'Content-Type': 'application/json' }, // acceptat după CORS pre‑flight
+      body   : JSON.stringify(payload)                 // trimitem JSON nativ
+    });
+
+    if (!response.ok) throw new Error(await response.text());
     alert('✔ Datele au fost salvate!');
   } catch (err) {
     console.error(err);
-    alert('Eroare la trimitere – verifică rețeaua.');
+    alert('Eroare la trimitere: ' + err.message);
   }
 }
+
             
             calculateScore() {
                 const questions = this.allQuizData[this.activeQuizId].questions;
