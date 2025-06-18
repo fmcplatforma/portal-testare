@@ -436,33 +436,26 @@
             }
             
             async sendDataToSheet(payload) {
-                if (!WEB_APP_URL) {
-                    this.showNotification(
-                      'Configurează constantă WEB_APP_URL cu link-ul Apps Script.',
-                      'error'
-                    );
-                    return;
-                }
+  if (!WEB_APP_URL.startsWith('https://script.google.com/')) {
+    alert('CONFIG: pune URL-ul Apps Script în WEB_APP_URL.');
+    return;
+  }
+  try {
+    console.log('Trimit…', payload);
 
-                try {
-                    this.showNotification('Se salvează rezultatul…', 'info', 1500);
+    await fetch(WEB_APP_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type':'application/json' },
+      body:    JSON.stringify(payload)
+    });
 
-                    await fetch(WEB_APP_URL, {
-                        method:  'POST',
-                        mode:    'no-cors',                 // ← elimină pre-flight CORS
-                        cache:   'no-cache',
-                        headers: { 'Content-Type': 'application/json' },
-                        body:    JSON.stringify(payload)
-                    });
-
-                    this.showNotification('✔ Rezultatul a fost salvat!', 'success');
-                    console.log('✅ Data sent to Google Sheet:', payload);
-
-                } catch (err) {
-                    console.error(err);
-                    this.showNotification('Eroare la trimiterea datelor.', 'error');
-                }
-            }
+    alert('✔ Datele au fost salvate!');
+  } catch (err) {
+    console.error(err);
+    alert('Eroare la trimitere – verifică rețeaua.');
+  }
+}
             
             calculateScore() {
                 const questions = this.allQuizData[this.activeQuizId].questions;
