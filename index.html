@@ -1,69 +1,63 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-<meta charset="UTF-8">
-<title>Test Simplu – înscriere în Google Sheet</title>
-<style>
-body{font:16px/1.4 Arial;padding:2rem;max-width:500px;margin:auto}
-label{display:block;margin-top:1rem}input{width:100%;padding:.4rem}
-button{margin-top:1.5rem;padding:.6rem 1.2rem}
-</style>
+  <meta charset="utf-8">
+  <title>Formular demo → Google Sheets</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    label { display: block; margin-top: .8rem; }
+    input, textarea { width: 100%; padding: .4rem; }
+    button { margin-top: 1rem; padding: .6rem 1.2rem; }
+    .ok { color: green; }
+    .err { color: red;  }
+  </style>
 </head>
 <body>
+  <h1>Trimite mesajul</h1>
+  <form id="contact">
+    <label>Nume
+      <input name="nume" required>
+    </label>
+    <label>Email
+      <input name="email" type="email" required>
+    </label>
+    <label>Mesaj
+      <textarea name="mesaj" rows="4" required></textarea>
+    </label>
+    <button type="submit">Trimite</button>
+  </form>
 
-<h2>Formular Test (sheet „FormData”)</h2>
+  <p id="status"></p>
 
-<form id="simpleForm" autocomplete="off">
-  <label>Organizație
-    <input name="organization" required>
-  </label>
-  <label>Nume
-    <input name="lastName" required>
-  </label>
-  <label>Prenume
-    <input name="firstName" required>
-  </label>
-  <label>Funcție
-    <input name="position" required>
-  </label>
-  <label>Data
-    <input type="date" name="date" required>
-  </label>
-  <label>Titlu test
-    <input name="quizTitle" value="Chestionar de Evaluare GDPR" required>
-  </label>
-  <label>Punctaj
-    <input name="score" type="number" value="88" required>
-  </label>
-  <label>Calificativ
-    <input name="grade" value="Bine" required>
-  </label>
+  <script>
+    // 🔁 Înlocuiește cu URL‑ul web‑app‑ului tău
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxS_extghrJNY6RHhv_AymU81U2f6QOfQR_bRZyUzdqbUIZdg0IdmSXFcrPeKMx2_aVng/exec';
 
-  <button type="submit">Trimite în Sheet</button>
-</form>
+    document.getElementById('contact').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const form = ev.target;
+      const data = Object.fromEntries(new FormData(form).entries());
 
-<script>
-/* ---------- pune aici URL‑ul din Deploy → Web app (termină în /exec) ---------- */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwJtq9ETpvLLJX-1Ti90PGgacPnbKhrudTm4-AaGSPmmNiibs8sm-2B-uw3TRXC4mCJcA/exec';
-/* ----------------------------------------------------------------------------- */
-
-document.getElementById('simpleForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-
-  const payload = Object.fromEntries(new FormData(e.target));
-  try{
-    const r = await fetch(WEB_APP_URL,{
-      method : 'POST',
-      headers: { 'Content-Type':'application/json' }, // declanșează OPTIONS, corpul ajunge
-      body   : JSON.stringify(payload)
+      try {
+        const r = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',          // evita CORS preflight; răspunsul nu poate fi citit
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        // nu putem citi JSON-ul când folosim no-cors, dar știm că a plecat OK
+        form.reset();
+        msg('Mesajul a fost trimis!', true);
+      } catch (err) {
+        msg('Eroare la trimitere: ' + err, false);
+      }
     });
-    if(!r.ok) throw new Error(await r.text());
-    alert('✔ Rând adăugat!');
-  }catch(err){
-    console.error(err);
-    alert('❌ Eroare: ' + err.message);
-  }
-});
-</script>
+
+    function msg(text, ok) {
+      const p = document.getElementById('status');
+      p.textContent = text;
+      p.className   = ok ? 'ok' : 'err';
+    }
+  </script>
 </body>
 </html>
