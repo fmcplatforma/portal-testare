@@ -231,7 +231,8 @@
 
     <script>
         /* URL-ul generat la Deploy → Web app */
-	const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwX4FSG8zxiAPbCAmZ5401FQ8BKVhw2LhMDKcFRHlAin9Py5zBxVaD-meykrxeAZVQs8A/exec';
+	const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyVAQAi-IsuP8Igj7mxa1xlpLhAdYdNszo-4dU6QTsNxLd0kra5G8X1TcZcD51L9EAn9g/exec';
+
 
         const allQuizzes = {
             gdpr: {
@@ -447,18 +448,12 @@
                     this.showNotification('Se salvează rezultatul…', 'info', 1500);
 
                     await fetch(WEB_APP_URL, {
-			-  method:  'POST',
-			-  mode:    'cors',
-			-  cache:   'no-cache',
-			-  headers: { 'Content-Type': 'application/json' },
-			-  body:    JSON.stringify(payload)
-			+  method:  'POST',
-			+  mode:    'no-cors',                                    // ← fără pre‑flight
-			+  cache:   'no-cache',
-			+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },// ← SIMPLE header
-			+  body:    JSON.stringify(payload)
-		});
-
+                        method:  'POST',
+                        mode:    'no-cors',                 // ← elimină pre-flight CORS
+                        cache:   'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body:    JSON.stringify(payload)
+                    });
 
                     this.showNotification('✔ Rezultatul a fost salvat!', 'success');
                     console.log('✅ Data sent to Google Sheet:', payload);
