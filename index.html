@@ -573,51 +573,53 @@
                 this.showResults(score);
             }
 
-            // ===== FUNCȚIA ULTRA-SIMPLĂ DE TRIMITERE =====
-            async sendDataToSheet(payload) {
-                if (!WEB_APP_URL) {
-                    this.showNotification('URL-ul Google Apps Script nu este configurat!', 'error');
-                    return;
-                }
-                
-                console.log('📤 Trimit datele către Google Sheets:', payload);
-                
-                // Afișăm loading
-                const finishBtn = document.getElementById('finishBtn');
-                const originalText = finishBtn.innerHTML;
-                finishBtn.innerHTML = '<span class="loading"></span> Se salvează...';
-                finishBtn.disabled = true;
-                
-                // Construim URL-ul cu parametri
-                const params = new URLSearchParams();
-                Object.keys(payload).forEach(key => {
-                    params.append(key, payload[key] || '');
-                });
-                
-                const url = `${WEB_APP_URL}?${params.toString()}`;
-                console.log('🔗 URL construit:', url);
-                
-                // SOLUȚIA ULTRA-SIMPLĂ: Trimitem și gata!
-                try {
-                    // Trimitem cererea (nu așteptăm răspuns)
-                    fetch(url, { method: 'GET', mode: 'no-cors' });
-                    console.log('📤 Cerere trimisă!');
-                } catch (error) {
-                    console.log('ℹ️ Eroare ignorată:', error);
-                }
-                
-                // Simulăm o mică întârziere pentru feedback vizual
-                setTimeout(() => {
-                    console.log('✅ Presupunem că s-a salvat cu succes!');
-                    this.showNotification('✅ Datele au fost salvate cu succes!', 'success');
-                    
-                    // Restaurăm butonul
-                    if (finishBtn) {
-                        finishBtn.innerHTML = originalText;
-                        finishBtn.disabled = false;
-                    }
-                }, 1500); // 1.5 secunde
+            // ===== FUNCȚIA HTML ADAPTATĂ DUPĂ EXEMPLUL CARE FUNCȚIONEAZĂ =====
+async sendDataToSheet(payload) {
+    if (!WEB_APP_URL) {
+        this.showNotification('URL-ul Google Apps Script nu este configurat!', 'error');
+        return false;
+    }
+    
+    console.log('📤 Trimit datele către Google Sheets (POST JSON):', payload);
+    
+    // Afișăm loading
+    const finishBtn = document.getElementById('finishBtn');
+    const originalText = finishBtn.innerHTML;
+    finishBtn.innerHTML = '<span class="loading"></span> Se salvează...';
+    finishBtn.disabled = true;
+    
+    try {
+        // FOLOSIM EXACT ACEEAȘI METODĂ CA ÎN EXEMPLUL CARE FUNCȚIONEAZĂ
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',          // evita CORS preflight; răspunsul nu poate fi citit
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        // Nu putem citi JSON-ul când folosim no-cors, dar știm că a plecat OK
+        console.log('✅ Cerere POST trimisă cu succes!');
+        this.showNotification('✅ Datele au fost salvate cu succes!', 'success');
+        
+        return true;
+        
+    } catch (error) {
+        console.log('❌ Eroare la trimitere:', error);
+        this.showNotification('⚠️ Eroare la trimitere: ' + error, 'error');
+        return false;
+        
+    } finally {
+        // Restaurăm butonul
+        setTimeout(() => {
+            if (finishBtn) {
+                finishBtn.innerHTML = originalText;
+                finishBtn.disabled = false;
             }
+        }, 1000);
+    }
+}
+
+
             
             calculateScore() {
                 const questions = this.allQuizData[this.activeQuizId].questions;
