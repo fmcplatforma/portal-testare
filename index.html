@@ -1,720 +1,84 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Testare Internă</title>
-    
-    <style>
-        :root {
-            --primary-start: #667eea;
-            --primary-end: #764ba2;
-            --secondary: #718096;
-            --success: #48bb78;
-            --danger: #f56565;
-            --warning: #ed8936;
-            --info: #4299e1;
-            --text-primary: #333;
-            --text-secondary: #4a5568;
-            --text-light: white;
-            --bg-body: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
-            --bg-card: white;
-            --bg-card-alt: #f7fafc;
-            --border-color: #e2e8f0;
-            --border-radius: 12px;
-            --box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--bg-body);
-            min-height: 100vh;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; color: var(--text-light); }
-        .header-content h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .section { margin-bottom: 30px; }
-        .hidden { display: none !important; }
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--box-shadow);
-            border: 1px solid rgba(255,255,255,0.2);
-            animation: fadeIn 0.5s ease-out;
-        }
-        .card h2 { color: var(--text-secondary); margin-bottom: 20px; font-size: 1.8rem; border-bottom: 3px solid var(--primary-start); padding-bottom: 10px; }
-        .form-group { margin-bottom: 20px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); }
-        input[type="text"], input[type="date"] {
-            width: 100%; padding: 12px; border: 2px solid var(--border-color);
-            border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="date"]:focus {
-            outline: none; border-color: var(--primary-start);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .btn {
-            padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px;
-            font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-            text-decoration: none; display: inline-block; text-align: center;
-        }
-        .btn-primary { background: var(--bg-body); color: var(--text-light); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
-        .btn-secondary { background: var(--secondary); color: var(--text-light); }
-        .btn-success { background: var(--success); color: var(--text-light); }
-        .btn-outline { background: transparent; color: var(--primary-start); border: 2px solid var(--primary-start); }
-        .btn-outline:hover { background: var(--primary-start); color: var(--text-light); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-        .instructions-content ul { margin: 15px 0; padding-left: 20px; }
-        .instructions-content li { margin-bottom: 8px; }
-        .scoring-grid { margin-top: 20px; padding: 20px; background: var(--bg-card-alt); border-radius: 8px; }
-        .scoring-grid h3 { margin-bottom: 15px; color: var(--text-secondary); }
-        .score-item { padding: 10px 15px; margin: 8px 0; border-radius: 6px; font-weight: 600; }
-        .score-item.excellent { background: #c6f6d5; color: #22543d; border-left: 4px solid var(--success); }
-        .score-item.good { background: #bee3f8; color: #2a4365; border-left: 4px solid var(--info); }
-        .score-item.satisfactory { background: #fef5e7; color: #744210; border-left: 4px solid var(--warning); }
-        .score-item.poor { background: #fed7d7; color: #742a2a; border-left: 4px solid var(--danger); }
-        .progress-container { margin-bottom: 30px; text-align: center; }
-        .progress-bar { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
-        .progress-fill { height: 100%; background: var(--bg-body); transition: width 0.3s ease; width: 0%; }
-        .progress-text { font-weight: 600; color: var(--text-secondary); }
-        .question { background: var(--bg-card-alt); border-radius: 8px; padding: 25px; margin-bottom: 20px; border-left: 4px solid var(--primary-start); }
-        .question h3 { color: var(--text-secondary); margin-bottom: 20px; font-size: 1.2rem; line-height: 1.5; }
-        .options { list-style: none; }
-        .option label { display: flex; align-items: flex-start; cursor: pointer; padding: 12px; border-radius: 6px; transition: background-color 0.2s ease; font-weight: normal; border: 1px solid transparent; }
-        .option label:hover { background: #edf2f7; }
-        .option input[type="checkbox"] { margin-right: 12px; margin-top: 4px; transform: scale(1.2); }
-        .option input[type="checkbox"]:checked + span { font-weight: 600; }
-        .option label.correct-answer { background-color: #c6f6d5; border-color: var(--success); }
-        .option label.incorrect-answer { background-color: #fed7d7; border-color: var(--danger); text-decoration: line-through; }
-        .option label.missed-answer { border: 2px dashed var(--warning); }
-        .results-actions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .result-summary { text-align: center; margin-bottom: 20px; }
-        .score-display { font-size: 3rem; font-weight: bold; color: var(--primary-start); }
-        .grade-display { font-size: 1.5rem; font-weight: 600; padding: 10px 20px; display: inline-block; }
-        .participant-info { background: #edf2f7; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .info-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #cbd5e0; }
-        .quiz-selection-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: center; }
-        .quiz-card { padding: 30px; border: 2px solid var(--border-color); border-radius: var(--border-radius); cursor: pointer; transition: all 0.3s ease; }
-        .quiz-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: var(--primary-start); }
-        .quiz-card.completed { cursor: not-allowed; background-color: #f7fafc; opacity: 0.7; }
-        .quiz-card.completed:hover { transform: none; box-shadow: none; border-color: var(--border-color); }
-        .quiz-card h3 { font-size: 1.5rem; color: var(--text-secondary); margin-bottom: 15px; }
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
-        .status-badge.pending { background-color: #e2e8f0; color: #4a5568; }
-        .status-badge.completed { background-color: var(--success); color: white; }
-        .footer { text-align: center; margin-top: 50px; padding: 20px; color: var(--text-light); opacity: 0.8; }
-        .notification {
-            position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px;
-            color: white; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000; transform: translateX(120%); transition: transform 0.5s ease-in-out;
-        }
-        .notification.show { transform: translateX(0); }
-        .notification.success { background-color: var(--success); }
-        .notification.error { background-color: var(--danger); }
-        .notification.info { background-color: var(--info); }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-start);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) {
-            .form-row, .info-grid, .quiz-selection-container { grid-template-columns: 1fr; }
-            .results-actions { flex-direction: column; gap: 15px; }
-            .results-actions .btn { width: 100%; }
-        }
-        @media print {
-            body { background: none; color: #000; }
-            .container { max-width: 100%; padding: 0; }
-            .header, .footer, .results-actions, #instructions, #participant-form, .progress-container, #quiz-selection { display: none; }
-            .card { box-shadow: none; border: 1px solid #ccc; padding: 15px; page-break-inside: avoid; }
-            #results { display: block !important; }
-            .score-display, .grade-display { color: var(--primary-start); }
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Quiz → Google Sheets</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; }
+    label { display: block; margin-top: .8rem; }
+    input, select { width: 100%; padding: .4rem; }
+    button { margin-top: 1rem; padding: .6rem 1.2rem; }
+    .ok   { color: #0a0; margin-top: 1rem; }
+    .err  { color: #c00; margin-top: 1rem; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <h1>Portal de Testare Internă</h1>
-            </div>
-        </header>
+  <h1>Înregistrează rezultatul quiz-ului</h1>
 
-        <main>
-            <section id="participant-form" class="section">
-                <div class="card">
-                    <h2>Date Participant</h2>
-                    <form id="participantForm" autocomplete="off">
-                        <div class="form-group">
-                            <label for="organization">Organizația:</label>
-                            <input type="text" id="organization" name="organization" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lastName">Nume:</label>
-                                <input type="text" id="lastName" name="lastName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="firstName">Prenume:</label>
-                                <input type="text" id="firstName" name="firstName" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="position">Funcția:</label>
-                                <input type="text" id="position" name="position" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="date">Data:</label>
-                                <input type="date" id="date" name="date" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Continuă</button>
-                    </form>
-                </div>
-            </section>
+  <form id="quizForm" autocomplete="off">
+    <label>Organizație
+      <input name="organization" required>
+    </label>
+    <label>Nume
+      <input name="lastName" required>
+    </label>
+    <label>Prenume
+      <input name="firstName" required>
+    </label>
+    <label>Poziție / Funcție
+      <input name="position">
+    </label>
+    <label>Data (YYYY-MM-DD)
+      <input name="date" type="date" required>
+    </label>
+    <label>Titlul quiz-ului
+      <input name="quizTitle" value="Quiz EMC" required>
+    </label>
+    <label>Scor
+      <input name="score" type="number" min="0" required>
+    </label>
+    <label>Calificativ
+      <select name="grade" required>
+        <option value="ADMIS">ADMIS</option>
+        <option value="RESPINS">RESPINS</option>
+      </select>
+    </label>
 
-            <section id="quiz-selection" class="section hidden">
-                <div class="card">
-                    <h2>Alegeți Testul de Evaluare</h2>
-                    <div class="quiz-selection-container">
-                        <div id="quiz-card-gdpr" class="quiz-card" data-quiz-id="gdpr">
-                            <h3>Test GDPR</h3>
-                            <span id="status-gdpr" class="status-badge pending">Neînceput</span>
-                        </div>
-                        <div id="quiz-card-mto" class="quiz-card" data-quiz-id="mto">
-                            <h3>Test Măsuri Tehnice și Organizatorice</h3>
-                            <span id="status-mto" class="status-badge pending">Neînceput</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <button type="submit">Trimite înregistrarea</button>
+  </form>
 
-            <section id="instructions" class="section hidden">
-                <div class="card">
-                    <h2 id="instructions-title">Instrucțiuni</h2>
-                    <div class="instructions-content">
-                        <p><strong>Testul grilă este de tip răspunsuri corecte multiple.</strong></p>
-                        <p>Evaluarea răspunsurilor va fi făcută în modul următor:</p>
-                        <ul id="instructions-rules"></ul>
-                    </div>
-                    <div class="scoring-grid">
-                        <h3>Grila de interpretare:</h3>
-                        <div class="score-item excellent">90-100 puncte – Foarte bine</div>
-                        <div class="score-item good">70-89 puncte – Bine</div>
-                        <div class="score-item satisfactory">50-69 puncte – Satisfăcător – Necesita reinstruire punctuală</div>
-                        <div class="score-item poor">Sub 50 puncte – Necesită reinstruire</div>
-                    </div>
-                    <button id="startQuiz" class="btn btn-primary" style="margin-top: 20px;">Începe Testul</button>
-                </div>
-            </section>
+  <p id="status"></p>
 
-            <section id="questionnaire" class="section hidden">
-                 <div class="progress-container" aria-live="polite">
-                    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-                    <span id="progressText" class="progress-text"></span>
-                </div>
-                <div id="questionsContainer" class="questions-container"></div>
-                <div class="navigation-buttons">
-                    <button id="finishBtn" class="btn btn-success" style="margin: 0 auto;">Finalizează Testul</button>
-                </div>
-            </section>
+  <script>
+    // ← Înlocuiește cu URL-ul generat la Deploy
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxS_extghrJNY6RHhv_AymU81U2f6QOfQR_bRZyUzdqbUIZdg0IdmSXFcrPeKMx2_aVng/exec';
 
-            <section id="results" class="section hidden">
-                <div class="card">
-                    <h2 id="results-title">Rezultate Test</h2>
-                    <div id="resultsContent" class="results-content"></div>
-                    <div style="margin-top: 30px;">
-                        <h2>Revizuire Răspunsuri</h2>
-                        <div id="reviewContainer"></div>
-                    </div>
-                </div>
-                 <div class="results-actions" style="margin-top: 30px;">
-                    <button id="backToSelectionBtn" class="btn btn-primary">Înapoi la Selecția Testelor</button>
-                    <button id="printResults" class="btn btn-secondary">Printează Rezultatele</button>
-                    <button class="btn btn-outline" onclick="window.location.reload()">Începe Sesiune Nouă</button>
-                </div>
-            </section>
-        </main>
-        
-        <footer class="footer">
-            <p>&copy; 2024 Portal de Testare Internă</p>
-        </footer>
-    </div>
+    const form   = document.getElementById('quizForm');
+    const status = document.getElementById('status');
 
-    <script>
-        // ===== CONFIGURAȚIE =====
-        // IMPORTANT: Înlocuiți cu URL-ul vostru de la Google Apps Script
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxS_extghrJNY6RHhv_AymU81U2f6QOfQR_bRZyUzdqbUIZdg0IdmSXFcrPeKMx2_aVng/exec';
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      status.textContent = 'Se trimite…';
+      status.className   = '';
 
-        // ===== DATE TESTE =====
-        const allQuizzes = {
-            gdpr: {
-                title: "Chestionar de Evaluare GDPR",
-                scoringRules: ["Fiecare întrebare are 4 puncte.", "Punctajul maxim este 100.", "Răspunsurile incorecte nu se scad."],
-                questions: [
-                    { id: 1, text: "Ce reprezinta persoana fizica identificabila in contextul GDPR:", options: ["persoana care poate fi identificata, direct sau indirect, in special prin referire la un element de identificare", "persoana despre care putem afla informatii din discutii cu prietenii"], correctAnswers: [0], points: 4 },
-                    { id: 2, text: "Prelucrarea este considerata legala daca exista oricare din urmatoarele:", options: ["Consimtamant", "Contract", "Obligatii legale ale operatorului", "Dorinta expresa a persoanei de a face parte dintr-un studiu statistic", "Interes vital al persoanei vizate"], correctAnswers: [0, 1, 2, 4], points: 16 },
-                    { id: 3, text: "In cazul unui control de la ANSPDCP, dovada conformarii la GDPR trebuie facuta de:", options: ["DPO", "firma de service IT", "de catre operator"], correctAnswers: [2], points: 4 },
-                    { id: 4, text: "Unele din conditiile stergerii datelor cu caracter personal d.p.d.v. a drepturilor persoanelor vizate sunt:", options: ["retragerea consimtamantului persoanei vizate si nu mai exista niciun temei legal pentru procesare", "datele au fost colectate/prelucrate ilegal", "persoana vizata se opune prelucrarii si nu exista motive legitime care sa prevaleze", "lipsa spatiului de stocare pe echipamentele de procesare"], correctAnswers: [0, 1, 2], points: 12 },
-                    { id: 5, text: "In functia de DPO in cadrul unei organizatii poate fi numit:", options: ["managerul general al companiei deoarece cunoaste structura intregii organizatii", "seful IT deoarece poate asigura securitatea tehnica a datelor cu caracter personal", "orice persoana ce face dovada cunostintelor necesare si nu intra in conflict de interese cu functia de DPO"], correctAnswers: [2], points: 4 },
-                    { id: 6, text: "Care din urmatoarele elemente fac parte din notificarea ANSPDCP in cazul unei incalcari de securitate?", options: ["caracterul încalcarii (descrierea incidentului)", "categoriile si numarul aproximativ de persoane afectate", "categoriile si numarul aproximativ al înregistrarilor afectate", "numele si datele de contact ale DPO sau alta persoana de contact"], correctAnswers: [0, 1, 2, 3], points: 16 },
-                    { id: 7, text: "Care din urmatoarele elemente trebuie continute de studiul de impact (DPIA):", options: ["descrierea sistematica a proceselor de prelucrare/procesare a datelor, inclusiv interesul legitim al operatorului", "evaluarea necesitatii si proportionalitatii operatiunilor de prelucrare în legatura cu scopurile stabilite", "evaluarea riscurilor pentru drepturile si libertatile persoanelor vizate", "masurile preconizate pentru tratarea riscurilor, inclusiv garantiile, masurile de securitate si mecanismele pentru protectia datelor"], correctAnswers: [0, 1, 2, 3], points: 16 },
-                    { id: 8, text: "Care din urmatoarele elemente fac parte din continutul listei privind inregistrarile despre prelucrare ale operatorului:", options: ["transferuri trans-frontaliere si masurile de securitate necesare", "perioada de stocare/prelucrare", "masuri tehnice si organizatorice de securitate"], correctAnswers: [0, 1, 2], points: 12 },
-                    { id: 9, text: "Care din urmatoarele trebuie indeplinite in cazul supravegherii prin mijloace electronice la locul de munca?", options: ["a fost consultat sindicatul inainte de introducerea sistemelor de monitorizare", "nu exista alte metode mai putin intruzive pentru indeplinirea scopului"], correctAnswers: [0, 1], points: 8 },
-                    { id: 10, text: "Un studiu de impact (DPIA) este necesar:", options: ["in orice organizatie", "in cazul in care un tip de prelucrare a datelor este susceptibil sa genereze un risc ridicat", "in cazul prelucrarii pe scara larga a datelor din categorii speciale"], correctAnswers: [1, 2], points: 8 }
-                ]
-            },
-            mto: {
-                title: "Chestionar Măsuri Tehnice și Organizatorice",
-                scoringRules: ["Fiecare răspuns corect are 5 puncte.", "Totalul de puncte este 100.", "Răspunsurile incorecte nu se scad."],
-                questions: [
-                    { id: 1, text: "Care este scopul pregatirii privind cunoasterea unor masuri generale tehnice si organizatorice de protejare a datelor cu caracter personal ?", options: ["are scopul de a imbunatati cunostintele, de a pregati si instrui personalul organizatiei in utilizarea in mod curent a regulilor generale si masurilor tehnice si organizatorice de protejare a datelor cu caracter personal", "are scopul de ocupa timpul liber a angajatilor pentru a evita plictiseala la locul de munca"], correctAnswers: [0], points: 5 },
-                    { id: 2, text: "Care din cele de mai jos reprezinta masuri tehnice de protejare a datelor cu caracter personal ?", options: ["criptarea", "pseudonimizarea", "copiile de siguranta", "contractul de confidentialitate"], correctAnswers: [0, 1, 2], points: 15 },
-                    { id: 3, text: "Ce caractere trebuie sa contina o parola ?", options: ["litere mari", "litere mici", "cifre", "caractere speciale", "numele si prenumele", "cifrele 123456", "o fraza secreta care include pe langa litere si caractere speciale si cifre"], correctAnswers: [0, 1, 2, 3, 6], points: 25 },
-                    { id: 4, text: "Ce nu trebuie sa contina o parola ?", options: ["caractere speciale", "numele animalului de companie", "ziua, luna, anul nasterii", "litere mici"], correctAnswers: [1, 2], points: 10 },
-                    { id: 5, text: "Cum poate fi transmisa parola contului dumneavoastra altei persoane ?", options: ["nu este recomandata divulgarea parolei", "prin e-mail", "prin fax", "prin plic postal adresat persoanei in cauza"], correctAnswers: [0], points: 5 },
-                    { id: 6, text: "Cum pot fi informatiile de serviciu importante protejate impotriva stergerii accidentale sau a defectarii calculatorului ?", options: ["prin copiere pe o memorie amovibila aprobata", "prin scriere pe un CD /DVD", "prin copiere intr-un echipament de back-up", "prin scriere intr-un registru a denumirii documentelor in cauza"], correctAnswers: [0, 1, 2], points: 15 },
-                    { id: 7, text: "Ce aplicatii trebuie sa fie instalate pe calculatoarele de serviciu ?", options: ["cele aprobate in vederea desfasurarii activitatii conform atributiilor", "facebook", "whatsapp", "netflix", "aplicatii tip torente"], correctAnswers: [0], points: 5 },
-                    { id: 8, text: "Referitor la comunicatiile prin e-mail, este recomandat sa accesati link-urile primite de la corespondenti necunoscuti prin care va sunt trimise diverse oferte ?", options: ["nu, deoarece ar fi posibil ca sa ascunda un atac informatic", "da, deoarece as putea fi interesat de ofertele primite", "le deschid intotdeauna pe cele legate de vacante exotice"], correctAnswers: [0], points: 5 },
-                    { id: 9, text: "Cum este recomandat sa va conectati la resursele companiei cand lucrati de acasa ?", options: ["intotdeauna printr-un sistem securizat de tip VPN pus la dispozitie de companie", "prin orice solutie invatata de la un coleg chiar daca presupune instalarea unei aplicatii care pacaleste personalul IT", "prin orice mijloace asa fel incat sa nu fie necesara deplasarea la firma"], correctAnswers: [0], points: 5 },
-                    { id: 10, text: "In ceea ce priveste securitatea echipamentelor critice, accesul la acestea trebuie sa se faca:", options: ["la cererea sefului direct", "cu acordul secretarei", "accesul trebuie sa fie strict procedurat", "este necesara mentinerea evidentei persoanelor care au accesat camera serverelor", "este recomandat ca incaperea sa fie deschisa pentru a facilita oricand accesul celor ce trebuie sa faca reparatii"], correctAnswers: [2, 3], points: 10 }
-                ]
-            }
-        };
+      const payload = Object.fromEntries(new FormData(form).entries());
 
-        // ===== CLASA PRINCIPALĂ =====
-        class UnifiedQuizApp {
-            constructor() {
-                this.participantData = null;
-                this.activeQuizId = null;
-                this.allQuizData = allQuizzes;
-                this.quizResults = {};
-                this.currentAnswers = {};
-                this.originalDocTitle = document.title;
-                this.initializeApp();
-            }
-
-            initializeApp() {
-                // Setăm data curentă
-                const dateInput = document.getElementById('date');
-                if (dateInput) {
-                    dateInput.valueAsDate = new Date();
-                }
-                
-                this.initializeEventListeners();
-                console.log('🚀 Portal de Testare Internă inițializat cu succes!');
-            }
-
-            initializeEventListeners() {
-                // Event listener pentru formularul de participant
-                const participantForm = document.getElementById('participantForm');
-                if (participantForm) {
-                    participantForm.addEventListener('submit', e => {
-                        e.preventDefault();
-                        this.handleParticipantForm();
-                    });
-                }
-                
-                // Event listeners pentru cardurile de quiz
-                document.querySelectorAll('.quiz-card').forEach(card => {
-                    card.addEventListener('click', (e) => this.selectQuiz(e.currentTarget.dataset.quizId));
-                });
-                
-                // Event listeners pentru butoane
-                const startQuizBtn = document.getElementById('startQuiz');
-                if (startQuizBtn) {
-                    startQuizBtn.addEventListener('click', () => this.startQuiz());
-                }
-                
-                const finishBtn = document.getElementById('finishBtn');
-                if (finishBtn) {
-                    finishBtn.addEventListener('click', () => this.finishQuiz());
-                }
-                
-                const backToSelectionBtn = document.getElementById('backToSelectionBtn');
-                if (backToSelectionBtn) {
-                    backToSelectionBtn.addEventListener('click', () => this.showSelectionScreen());
-                }
-                
-                const printResultsBtn = document.getElementById('printResults');
-                if (printResultsBtn) {
-                    printResultsBtn.addEventListener('click', () => this.printResults());
-                }
-                
-                window.addEventListener('afterprint', () => {
-                    document.title = this.originalDocTitle;
-                });
-            }
-
-            handleParticipantForm() {
-                const formData = new FormData(document.getElementById('participantForm'));
-                const participantData = Object.fromEntries(formData);
-                
-                // Validare
-                const requiredFields = ['organization', 'lastName', 'firstName', 'position', 'date'];
-                const missingFields = requiredFields.filter(field => !participantData[field] || !participantData[field].trim());
-                
-                if (missingFields.length > 0) {
-                    this.showNotification('Vă rugăm să completați toate câmpurile obligatorii.', 'error');
-                    return;
-                }
-                
-                this.participantData = participantData;
-                this.quizResults = {};
-                console.log('Date participant salvate:', this.participantData);
-                this.showSelectionScreen();
-            }
-
-            showSelectionScreen() {
-                this.updateSelectionStatus();
-                this.showSection('quiz-selection');
-            }
-
-            updateSelectionStatus() {
-                Object.keys(this.allQuizData).forEach(quizId => {
-                    const statusBadge = document.getElementById(`status-${quizId}`);
-                    const card = document.getElementById(`quiz-card-${quizId}`);
-                    const result = this.quizResults[quizId];
-                    
-                    if (statusBadge && card) {
-                        if (result) {
-                            statusBadge.textContent = `Finalizat: ${result.score}/100`;
-                            statusBadge.className = 'status-badge completed';
-                            card.classList.add('completed');
-                        } else {
-                            statusBadge.textContent = 'Neînceput';
-                            statusBadge.className = 'status-badge pending';
-                            card.classList.remove('completed');
-                        }
-                    }
-                });
-            }
-            
-            selectQuiz(quizId) {
-                if (this.quizResults[quizId]) {
-                    this.showNotification('Acest test a fost deja finalizat. Reîncărcați pagina pentru o nouă sesiune.', 'info');
-                    return; 
-                }
-                
-                this.activeQuizId = quizId;
-                const quizData = this.allQuizData[quizId];
-                
-                const instructionsTitle = document.getElementById('instructions-title');
-                if (instructionsTitle) {
-                    instructionsTitle.textContent = `Instrucțiuni - ${quizData.title}`;
-                }
-                
-                const rulesContainer = document.getElementById('instructions-rules');
-                if (rulesContainer) {
-                    rulesContainer.innerHTML = '';
-                    quizData.scoringRules.forEach(ruleText => {
-                        const li = document.createElement('li');
-                        li.textContent = ruleText;
-                        rulesContainer.appendChild(li);
-                    });
-                }
-                
-                this.showSection('instructions');
-            }
-
-            startQuiz() {
-                this.currentAnswers = {};
-                this.renderQuestions();
-                this.showSection('questionnaire');
-            }
-            
-            renderQuestions(containerId = 'questionsContainer', isReview = false) {
-                const container = document.getElementById(containerId);
-                if (!container) return;
-                
-                container.innerHTML = '';
-                
-                const questions = this.allQuizData[this.activeQuizId].questions;
-                questions.forEach(q => {
-                    container.appendChild(this.createQuestionElement(q, isReview));
-                });
-                
-                if (!isReview) this.updateProgress();
-            }
-
-            createQuestionElement(question, isReview) {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question';
-                
-                const questionTitle = document.createElement('h3');
-                questionTitle.textContent = `${question.id}. ${question.text}`;
-                questionDiv.appendChild(questionTitle);
-                
-                const optionsList = document.createElement('ul');
-                optionsList.className = 'options';
-                
-                question.options.forEach((option, idx) => {
-                    const optionItem = document.createElement('li');
-                    optionItem.className = 'option';
-                    
-                    const label = document.createElement('label');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.value = idx;
-                    
-                    if (isReview) {
-                        checkbox.disabled = true;
-                        const userAnswer = this.quizResults[this.activeQuizId].answers[question.id] || [];
-                        const isCorrect = question.correctAnswers.includes(idx);
-                        const isChecked = userAnswer.includes(idx);
-                        
-                        if (isChecked) checkbox.checked = true;
-                        
-                        if (isCorrect && isChecked) {
-                            label.classList.add('correct-answer');
-                        } else if (!isCorrect && isChecked) {
-                            label.classList.add('incorrect-answer');
-                        } else if (isCorrect && !isChecked) {
-                            label.classList.add('missed-answer');
-                        }
-                    } else {
-                        checkbox.addEventListener('change', () => this.handleAnswerChange(question.id, idx, checkbox.checked));
-                    }
-                    
-                    const span = document.createElement('span');
-                    span.textContent = option;
-                    
-                    label.appendChild(checkbox);
-                    label.appendChild(span);
-                    optionItem.appendChild(label);
-                    optionsList.appendChild(optionItem);
-                });
-                
-                questionDiv.appendChild(optionsList);
-                return questionDiv;
-            }
-
-            handleAnswerChange(questionId, optionIndex, isChecked) {
-                if (!this.currentAnswers[questionId]) {
-                    this.currentAnswers[questionId] = [];
-                }
-                
-                if (isChecked) {
-                    if (!this.currentAnswers[questionId].includes(optionIndex)) {
-                        this.currentAnswers[questionId].push(optionIndex);
-                    }
-                } else {
-                    this.currentAnswers[questionId] = this.currentAnswers[questionId].filter(idx => idx !== optionIndex);
-                }
-                
-                this.updateProgress();
-            }
-
-            updateProgress() {
-                const totalQuestions = this.allQuizData[this.activeQuizId].questions.length;
-                const answeredQuestions = Object.keys(this.currentAnswers).filter(qId => 
-                    this.currentAnswers[qId] && this.currentAnswers[qId].length > 0
-                ).length;
-                
-                const progressPercent = (answeredQuestions / totalQuestions) * 100;
-                
-                const progressFill = document.getElementById('progressFill');
-                const progressText = document.getElementById('progressText');
-                
-                if (progressFill) {
-                    progressFill.style.width = `${progressPercent}%`;
-                }
-                
-                if (progressText) {
-                    progressText.textContent = `${answeredQuestions} din ${totalQuestions} întrebări completate`;
-                }
-            }
-
-            async finishQuiz() {
-                const totalQuestions = this.allQuizData[this.activeQuizId].questions.length;
-                const answeredQuestions = Object.keys(this.currentAnswers).filter(qId => 
-                    this.currentAnswers[qId] && this.currentAnswers[qId].length > 0
-                ).length;
-                
-                if (answeredQuestions < totalQuestions) {
-                    const confirmFinish = confirm(`Ați răspuns la ${answeredQuestions} din ${totalQuestions} întrebări. Doriți să finalizați testul?`);
-                    if (!confirmFinish) return;
-                }
-                
-                const score = this.calculateScore();
-                const grade = this.getGrade(score);
-                
-                // Pregătim datele pentru trimitere
-                const resultData = { 
-                    ...this.participantData,
-                    quizTitle: this.allQuizData[this.activeQuizId].title,
-                    score: score.toString(),
-                    grade: grade.text
-                };
-                
-                console.log('📊 Rezultate calculate:', { score, grade: grade.text });
-                console.log('📤 Date pentru trimitere:', resultData);
-                
-                // Trimitem datele către Google Sheets - VERSIUNEA ULTRA-SIMPLĂ
-                await this.sendDataToSheet(resultData);
-                
-                // Afișăm rezultatele
-                this.showResults(score);
-            }
-
-            // ===== FUNCȚIA HTML ADAPTATĂ DUPĂ EXEMPLUL CARE FUNCȚIONEAZĂ =====
-async sendDataToSheet(payload) {
-    if (!WEB_APP_URL) {
-        this.showNotification('URL-ul Google Apps Script nu este configurat!', 'error');
-        return false;
-    }
-    
-    console.log('📤 Trimit datele către Google Sheets (POST JSON):', payload);
-    
-    // Afișăm loading
-    const finishBtn = document.getElementById('finishBtn');
-    const originalText = finishBtn.innerHTML;
-    finishBtn.innerHTML = '<span class="loading"></span> Se salvează...';
-    finishBtn.disabled = true;
-    
-    try {
-        // FOLOSIM EXACT ACEEAȘI METODĂ CA ÎN EXEMPLUL CARE FUNCȚIONEAZĂ
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',          // evita CORS preflight; răspunsul nu poate fi citit
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
         });
-        
-        // Nu putem citi JSON-ul când folosim no-cors, dar știm că a plecat OK
-        console.log('✅ Cerere POST trimisă cu succes!');
-        this.showNotification('✅ Datele au fost salvate cu succes!', 'success');
-        
-        return true;
-        
-    } catch (error) {
-        console.log('❌ Eroare la trimitere:', error);
-        this.showNotification('⚠️ Eroare la trimitere: ' + error, 'error');
-        return false;
-        
-    } finally {
-        // Restaurăm butonul
-        setTimeout(() => {
-            if (finishBtn) {
-                finishBtn.innerHTML = originalText;
-                finishBtn.disabled = false;
-            }
-        }, 1000);
-    }
-}
 
-
-            
-            calculateScore() {
-                const questions = this.allQuizData[this.activeQuizId].questions;
-                return questions.reduce((total, q) => {
-                    const userAnswer = (this.currentAnswers[q.id] || []).sort();
-                    const correct = q.correctAnswers.sort();
-                    const isCorrect = userAnswer.length === correct.length && userAnswer.every((val, i) => val === correct[i]);
-                    return total + (isCorrect ? q.points : 0);
-                }, 0);
-            }
-
-            showResults(score) {
-                const grade = this.getGrade(score);
-                this.quizResults[this.activeQuizId] = {
-                    score,
-                    grade: grade.text,
-                    answers: { ...this.currentAnswers },
-                };
-                
-                const resultsContentEl = document.getElementById('resultsContent');
-                if (resultsContentEl) {
-                    let html = '<div class="result-summary">' +
-                               '<div class="score-display">' + score + '/100</div>' +
-                               '<div class="grade-display ' + grade.class + '">' + grade.text + '</div>' +
-                               '</div>' +
-                               '<div class="participant-info">' +
-                               '<h3>Informații Participant</h3>' +
-                               '<div class="info-grid">' +
-                               '<div class="info-item"><span>Nume:</span><span>' + this.participantData.lastName + ' ' + this.participantData.firstName + '</span></div>' +
-                               '<div class="info-item"><span>Organizația:</span><span>' + this.participantData.organization + '</span></div>' +
-                               '<div class="info-item"><span>Funcția:</span><span>' + this.participantData.position + '</span></div>' +
-                               '<div class="info-item"><span>Data:</span><span>' + this.participantData.date + '</span></div>' +
-                               '<div class="info-item"><span>Test Susținut:</span><span>' + this.allQuizData[this.activeQuizId].title + '</span></div>' +
-                               '<div class="info-item"><span>Punctaj:</span><span>' + score + '/100</span></div>' +
-                               '<div class="info-item"><span>Calificativ:</span><span>' + grade.text + '</span></div>' +
-                               '</div></div>';
-                    resultsContentEl.innerHTML = html;
-                }
-
-                const resultsTitle = document.getElementById('results-title');
-                if (resultsTitle) {
-                    resultsTitle.textContent = 'Rezultate - ' + this.allQuizData[this.activeQuizId].title;
-                }
-                
-                this.renderQuestions('reviewContainer', true);
-                this.showSection('results');
-            }
-
-            getGrade(score) {
-                if (score >= 90) return { text: "Foarte bine", class: "excellent" };
-                if (score >= 70) return { text: "Bine", class: "good" };
-                if (score >= 50) return { text: "Satisfăcător – Necesita reinstruire punctuală", class: "satisfactory" };
-                return { text: "Necesită reinstruire", class: "poor" };
-            }
-
-            showSection(sectionId) {
-                document.querySelectorAll('main > .section').forEach(s => s.classList.add('hidden'));
-                const targetSection = document.getElementById(sectionId);
-                if (targetSection) {
-                    targetSection.classList.remove('hidden');
-                }
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            printResults() {
-                if (!this.quizResults[this.activeQuizId]) {
-                    this.showNotification('Nu există rezultate de printat.', 'error');
-                    return;
-                }
-                
-                const quizTitle = this.allQuizData[this.activeQuizId].title;
-                const participantName = `${this.participantData.lastName} ${this.participantData.firstName}`;
-                document.title = `Portal de testare intern - ${quizTitle} - ${participantName}`;
-                window.print();
-            }
-            
-            showNotification(message, type = 'info', duration = 4000) {
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                setTimeout(() => notification.classList.add('show'), 10);
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => notification.remove(), 500);
-                }, duration);
-            }
-        }
-
-        // ===== INIȚIALIZARE =====
-        document.addEventListener('DOMContentLoaded', () => {
-            window.unifiedQuizApp = new UnifiedQuizApp();
-        });
-    </script>
+        if (!res.ok) throw new Error(res.statusText);
+        form.reset();
+        status.textContent = 'Înregistrare salvată ✔';
+        status.className   = 'ok';
+      } catch (err) {
+        status.textContent = 'Eroare: ' + err.message;
+        status.className   = 'err';
+      }
+    });
+  </script>
 </body>
 </html>
-
